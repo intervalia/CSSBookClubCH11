@@ -1,0 +1,357 @@
+<!doctype html>
+<html>
+<head>
+  <title>Table Demo</title>
+  <style>
+  .container {
+    background-color: #eee;
+    border: 1px dashed black;
+    display: inline-block;
+  }
+  .selected {
+    outline: 4px dashed #7FF9;
+    outline-offset: -2px;
+  }
+  .half {
+    display: inline-block;
+    vertical-align: top;
+    width: 49%;
+  }
+
+  [data-col], [data-row] {
+    background-color: #CCC;
+    font-size: 10px;
+    text-align: center;
+  }
+  </style>
+</head>
+<body onload="init()">
+  <div id="styles"></div>
+  <script>
+  var css = {
+    none: '',
+    zebra: `<style>
+      tr:nth-of-type(odd) {
+        background-color: #FF0;
+      }
+      tr:nth-of-type(even) {
+        background-color: #00F;
+      }
+      </style>
+      `,
+    zebra2: `<style>
+      tbody tr:nth-of-type(odd) {
+        background-color: #FF0;
+      }
+      tbody tr:nth-of-type(even) {
+        background-color: #00F;
+      }
+      </style>
+      `,
+    round1: `<style>
+      td {
+        border: 1px solid black;
+        border-radius: 5px;
+      }
+      </style>
+      `,
+    round2: `<style>
+      table {
+        border-collapse: collapse;
+      }
+      td {
+        border: 1px solid black;
+        border-radius: 10px;
+      }
+      </style>
+      `,
+    show: `<style>
+      table {
+        empty-cells: show;
+      }
+      td {
+        border: 1px solid black;
+      }
+      </style>
+      `,
+    hide: `<style>
+      table {
+        empty-cells: hide;
+      }
+      td {
+        border: 1px solid black;
+      }
+      </style>
+      `,
+    simple: `<style>
+      table, thead, tbody, tr, th, td {
+        border: 1px solid black;
+      }
+      table {
+        background-color: green;
+      }
+      thead {
+        background-color: blue;
+      }
+      tbody {
+        background-color: red;
+      }
+      tr {
+        background-color: black;
+      }
+      th {
+        background-color: #F5F;
+      }
+      td {
+        background-color: yellow;
+      }
+      </style>
+      `,
+    borderSpacing: `<style>
+      table, thead, tbody, tr, th, td {
+        border: 1px solid black;
+      }
+      table {
+        background-color: green;
+        border-spacing: 0;
+      }
+      thead {
+        background-color: blue;
+      }
+      tbody {
+        background-color: red;
+      }
+      tr {
+        background-color: black;
+      }
+      th {
+        background-color: #A0F;
+      }
+      td {
+        background-color: yellow;
+      }
+      </style>
+      `,
+    collapse: `<style>
+      table, thead, tbody, tr, th, td {
+        border: 1px solid black;
+      }
+      table {
+        background-color: green;
+        border-collapse: collapse;
+      }
+      thead {
+        background-color: blue;
+      }
+      tbody {
+        background-color: red;
+      }
+      tr {
+        background-color: black;
+      }
+      th {
+        background-color: #A0F;
+      }
+      td {
+        background-color: yellow;
+      }
+      </style>
+      `
+  };
+  var cssIndex = 0;
+  var selectedEl;
+  var table;
+  var selector;
+  function init() {
+    var els = document.querySelectorAll('input[type="range"]') || [];
+    els.forEach(el => el.addEventListener('input', change));
+    table = document.querySelector('table');
+    selector = document.querySelector('select');
+    selectTable();
+    table.addEventListener('click', selectByClick);
+    var el = document.querySelector('#bgcolor');
+    if (el) {
+      el.addEventListener('input', setbgcolor);
+    }
+  }
+
+  function loadCss() {
+    var el = document.getElementById('styles');
+    el.innerHTML = css[selector.value];
+  }
+
+  function change(evt) {
+    if (selectedEl) {
+      var item = evt.target.dataset.type;
+      var val = evt.target.value+'px';
+      console.log(item, val);
+      selectedEl.style[item] = val;
+    }
+  }
+
+  function selectByClick(evt) {
+    clearSelection();
+    selectedEl = evt.target;
+    if (evt.target.dataset.row) {
+      selectedEl = evt.target.parentElement;
+    }
+    if (evt.target.dataset.col) {
+      selectedEl = document.querySelector(`col.${evt.target.dataset.col}`);
+    }
+    setRanges();
+  }
+
+  function selectTable() {
+    clearSelection();
+    selectedEl = table;
+    setRanges();
+  }
+
+  function selectThead() {
+    clearSelection();
+    selectedEl = document.querySelector('thead');
+    setRanges();
+  }
+
+  function selectTbody() {
+    clearSelection();
+    selectedEl = document.querySelector('tbody');
+    setRanges();
+  }
+
+  function clearSelection() {
+    var el = document.querySelector(`.selected`);
+    if (el) {
+      el.classList.remove('selected');
+    }
+
+  }
+
+  const styleLink = {
+    //bgcolor: 'backgroundColor',
+    padding: 'paddingTop',
+    margin: 'marginTop',
+    borderWidth: 'borderWidth'
+  }
+
+  function setRanges() {
+    const styles = window.getComputedStyle(selectedEl);
+    var el = document.querySelector('input[data-type="bgcolor"]')
+    el.value = selectedEl.style['backgroundColor'];
+
+    selectedEl.classList.add('selected');
+    Object.keys(styleLink).forEach(
+      key => {
+        var el = document.querySelector(`input[data-type="${key}"]`)
+        if(key === 'bgcolor') {
+          el.value = styles[styleLink[key]];
+        }
+        else {
+          let value = parseInt(styles[styleLink[key]].slice(0,-2),10);
+          el.value = value;
+        }
+      }
+    )
+  }
+
+  function setbgcolor() {
+    selectedEl.style.backgroundColor = this.value || null;
+  }
+  </script>
+  <button onclick="selectTable()">select table</button>
+  <button onclick="selectThead()">select thead</button>
+  <button onclick="selectTbody()">select tbody</button>
+  <hr/>
+  <div class="container">
+    <table>
+      <colgroup>
+        <col class="name"/>
+        <col class="age"/>
+        <col class="email"/>
+        <col class="row"/>
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Age</th>
+          <th>Email</th>
+          <th data-row="true">ROW</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Frank N Stein</td>
+          <td>3 months</td>
+          <td>nofire@castle.com</td>
+          <td data-row="true">ROW</td>
+        </tr>
+        <tr>
+          <td>Boogy Man</td>
+          <td>8,937</td>
+          <td>boo@under_bed.com</td>
+          <td data-row="true">ROW</td>
+        </tr>
+        <tr>
+          <td>Zombie</td>
+          <td></td>
+          <td>bandages@castle.com</td>
+          <td data-row="true">ROW</td>
+        </tr>
+        <tr>
+          <td>Dracula</td>
+          <td>587</td>
+          <td>blood@castle.com</td>
+          <td data-row="true">ROW</td>
+        </tr>
+        <tr>
+          <td>Wicked Witch</td>
+          <td>148</td>
+          <td>spells@castle.com</td>
+          <td data-row="true">ROW</td>
+        </tr>
+        <tr>
+          <td data-col="name">COL</td>
+          <td data-col="age">COL</td>
+          <td data-col="email">COL</td>
+          <td data-col="row">COL</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <hr/>
+  <div class="half">
+    <div>Padding: <input type="range" list="tickmarks" min="0" max="10" step="1" value="0" style="width: 100px;" data-type="padding" /></div>
+    <div>Margin: <input type="range" list="tickmarks" min="0" max="10" step="1" value="0" style="width: 100px;" data-type="margin" /></div>
+    <div>Border: <input type="range" list="tickmarks" min="0" max="10" step="1" value="1" style="width: 100px;" data-type="borderWidth" /></div>
+  </div>
+  <div class="half">
+    BGColor: <input type="text" value="" id="bgcolor" data-type="bgcolor" />
+  </div>
+  <hr/>
+  <select onchange="loadCss()">
+    <option value="none">None</option>
+    <option value="simple">Simple</option>
+    <option value="borderSpacing">0 border spacing</option>
+    <option value="collapse">Collapse</option>
+    <option value="zebra">Zebra</option>
+    <option value="zebra2">Zebra 2</option>
+    <option value="round1">Rounded</option>
+    <option value="round2">Collapsed Rounded</option>
+    <option value="show">Show</option>
+    <option value="hide">Hide</option>
+  </select>
+  <datalist id="tickmarks">
+    <option value="0" label="0">
+    <option value="1">
+    <option value="2">
+    <option value="3">
+    <option value="4">
+    <option value="5">
+    <option value="6">
+    <option value="7">
+    <option value="8">
+    <option value="9">
+    <option value="10" label="10">
+  </datalist>
+</body>
+</html>
