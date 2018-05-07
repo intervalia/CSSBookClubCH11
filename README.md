@@ -10,7 +10,7 @@ You can click on the various cells and then set properties for that cell by usin
 
 If you click on a cell labeled `ROW` then the entire row is selected (the `<tr>` tag)
 
-If you click on a cell labeled 'COL` then the entire column is selected (the `<col>` tag)
+If you click on a cell labeled `COL` then the entire column is selected (the `<col>` tag)
 
 The three buttons at the top allow you to select the entire `<table>`, the `<thead>` and the `<tbody>`
 
